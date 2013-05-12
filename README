@@ -10,6 +10,8 @@ dependency management.
 **Logging is done with Logback
 http://logback.qos.ch/
 
+**Logs are written into logs directory
+
 **Game and wallet server are based on same server but are using different configuration
 
 **Game server accepts simple HTTP GET requests to update user balance
@@ -53,7 +55,7 @@ are cached.
 
 *CONFIGURATION
 
- **Configuration files are in proov\src\main\resources folder.
+ **Configuration files are in proov\src\main\resources directory.
 
    ***database.properties
       Specifies database connection parameters
