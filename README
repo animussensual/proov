@@ -1,0 +1,98 @@
+Contains code for game server, wallet server and related services.
+
+*GENERAL INFORMATION
+
+**Project building is based on Ant and Maven. It also uses maven
+dependency management.
+
+**Server uses Java NIO for networking
+
+**Logging is done with Logback
+http://logback.qos.ch/
+
+**Game and wallet server are based on same server but are using different configuration
+
+**Game server accepts simple HTTP GET requests to update user balance
+For example http://localhost:9999/?userName=andrus&balance=1000
+
+**Communication between game server and wallet server are done using java serialization
+
+**Request statistics are not saved but displayed through JMX
+
+**All server are started through ant. Also they can be stopped trough ant.
+
+**ant has separate targets for game server and wallet server
+start-hsqldb       Starts hsqldb database
+stop-hsqldb        Stops hsqldb database
+start-server       Start server
+stop-server        Stop server
+start-game-server  Start server
+stop-game-server   Stop games server
+
+***PS! These targets are tested only on Windows
+
+**Transaction id part is not implemented
+
+
+*ARCHITECTURE NOTES
+
+JVM entry point is com.playtech.proov.server.Server
+It initializes com.playtech.proov.server.Acceptor which listens connection requests
+and registers these for a com.playtech.proov.server.Dispatcher.
+
+Dispatcher delegates request processing to a specific com.playtech.proov.server.ProtocolHandler
+which knows how to parse request data(for example com.playtech.proov.http.HttpProtocolHandler)
+
+All protocol handlers invoke an application using com.playtech.proov.server.ApplicationInvoker
+
+Each application has an entry point which is a class that has com.playtech.proov.annotations.Application
+annotation. Application is unique by its path.
+
+Applications can also contain services which has javax.annotation.Resource annotation. Service instances
+are cached.
+
+*CONFIGURATION
+
+ **Configuration files are in proov\src\main\resources folder.
+
+   ***database.properties
+      Specifies database connection parameters
+
+   ***gameserver.properties
+      Contains game server configuration
+
+   ***server.properties
+      Contains wallet server configuration
+
+   ***logback.xml
+      Logger configuration
+
+   ***service.properties
+      Game application properties
+
+*INSTALLATION
+
+  **Build project
+    run 'ant build'
+
+  **Prepare hsqld
+    run 'ant create-schema'
+
+*RUNNING
+
+    **Start database
+        run 'ant start-hsqldb'
+
+    **Start wallet server
+        run 'ant start-server'
+
+     **Start game server
+        run 'ant start-game-server'
+
+USING
+
+    **Update balance requests
+     Send HTTP requests like 'http://localhost:9999/?userName=andrus&balance=1000'
+
+    **JMX
+     Use JConsole or JVisualVm to check requests statistics under 'com.playtech.proov'

@@ -1,0 +1,129 @@
+<project name="proov" basedir="." default="build" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+
+    <property file="src/main/resources/database.properties"/>
+
+
+    <artifact:dependencies filesetId="deps.fileset">
+        <pom file="pom.xml"/>
+    </artifact:dependencies>
+
+    <path id="server.classpath">
+        <!--${project.build.outputDirectory}-->
+        <pathelement location="target/classes"/>
+        <fileset refid="deps.fileset"/>
+    </path>
+
+    <path id="project.lib">
+        <fileset dir="lib">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="project.lib"/>
+    <taskdef resource="net/sf/antcontrib/antlib.xml" classpathref="project.lib"/>
+
+    <artifact:pom id="pom" file="pom.xml"/>
+
+
+    <target name="clean" description="Clean project">
+        <artifact:mvn pom="pom.xml">
+            <arg value="clean"/>
+        </artifact:mvn>
+    </target>
+
+    <target name="build" description="Build project" depends="clean">
+        <artifact:mvn pom="pom.xml">
+            <arg value="compile"/>
+        </artifact:mvn>
+    </target>
+
+
+    <target name="create-schema" depends="start-hsqldb" description="Creates database schema">
+        <sql
+                classpathref="project.lib"
+                driver="${db.driver}"
+                url="${db.url}"
+                userid="${db.username}"
+                password="${db.password}"
+                print="yes"
+                src="src/main/resources/createSchema.sql"
+                caching="false"
+                showheaders="true"
+                >
+        </sql>
+    </target>
+
+    <target name="start-hsqldb" depends="stop-hsqldb" description="Starts hsqldb database">
+        <java classname="org.hsqldb.Server" fork="yes" classpathref="project.lib" spawn="true">
+            <arg value="-database.0"/>
+            <arg value="file:${database.dir}/${db.name}"/>
+        </java>
+    </target>
+
+    <target name="stop-hsqldb"  description="Stops hsqldb database">
+        <sql
+                classpathref="project.lib"
+                driver="${db.driver}"
+                url="${db.url}"
+                userid="${db.username}" password="${db.password}"
+                autocommit="true"
+                failOnConnectionError="false"
+                onerror="continue">SHUTDOWN
+        </sql>
+    </target>
+
+    <macrodef name="start-server">
+        <attribute name="server.properties" default="server.properties"/>
+        <attribute name="server.log.file" default="server.log"/>
+        <sequential>
+            <java classname="com.playtech.proov.server.Server"
+                  classpathref="server.classpath" fork="true" spawn="true">
+                <arg value="@{server.properties}"/>
+                <sysproperty key="server.log.file" value="@{server.log.file}"/>
+                <sysproperty key="com.sun.management.jmxremote" value=""/>
+                <sysproperty key="com.sun.management.jmxremote.authenticate" value="false"/>
+            </java>
+        </sequential>
+    </macrodef>
+
+    <target name="start-server" description="Start server" depends="stop-server">
+        <start-server/>
+    </target>
+
+    <target name="start-game-server" description="Start server" depends="stop-server">
+        <start-server server.properties="gameserver.properties"/>
+        <start-server server.log.file="gameserver.log"/>
+    </target>
+
+    <macrodef name="stop-server">
+        <attribute name="port"/>
+        <sequential>
+            <exec outputproperty="pid" executable="bash">
+                <arg value="-c"/>
+                <arg value="netstat -ano|grep @{port}"/>
+            </exec>
+            <propertyregex regexp=".*([0-9]{4}).*" property="process.pid" input="${pid}" select="\1"/>
+
+            <exec executable="taskkill" osfamily="winnt" failonerror="false">
+                <arg value="/F"/>
+                <arg value="/PID"/>
+                <arg value="${process.pid}"/>
+            </exec>
+            <exec executable="kill" osfamily="unix" failonerror="false">
+                <arg value="-9"/>
+                <arg value="${process.pid}"/>
+            </exec>
+        </sequential>
+    </macrodef>
+
+    <target name="stop-server" description="Stop server">
+        <property file="src/main/resources/server.properties"/>
+        <stop-server port="${server.port}"/>
+    </target>
+
+    <target name="stop-game-server" description="Stop games server">
+        <property file="src/main/resources/gameserver.properties"/>
+        <stop-server port="${server.port}"/>
+    </target>
+
+</project>
