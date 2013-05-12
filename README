@@ -2,7 +2,7 @@ Contains code for game server, wallet server and related services.
 
 *GENERAL INFORMATION
 
-**Project building is based on Ant and Maven. It also uses maven
+**Project build is based on Ant and Maven. It also uses maven
 dependency management.
 
 **Server uses Java NIO for networking
