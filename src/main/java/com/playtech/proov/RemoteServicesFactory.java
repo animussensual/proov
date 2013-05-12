@@ -23,6 +23,9 @@ import java.net.Socket;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Provides access to remote services through proxy.
+ */
 public class RemoteServicesFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteServicesFactory.class);

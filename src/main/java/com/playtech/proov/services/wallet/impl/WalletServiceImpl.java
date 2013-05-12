@@ -103,10 +103,6 @@ public class WalletServiceImpl implements WalletService {
         return BigDecimal.ONE;
     }
 
-    public static void main(String[] args) throws SQLException {
-        WalletServiceImpl service = new WalletServiceImpl();
-        service.incrementBalance("andrus", BigDecimal.valueOf(100));
-    }
 
 }
 

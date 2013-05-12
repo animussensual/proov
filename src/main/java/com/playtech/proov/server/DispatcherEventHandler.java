@@ -68,7 +68,7 @@ public class DispatcherEventHandler {
     void onWritableEvent(Connection con) throws IOException {
         byte[] data = con.getWriteQueue().poll();
         if (data != null) {
-            System.out.printf("Server send data %s.%n", new String(data));
+            LOG.debug("Server send data {}", new String(data));
             con.getChannel().write(ByteBuffer.wrap(data));
         }
 

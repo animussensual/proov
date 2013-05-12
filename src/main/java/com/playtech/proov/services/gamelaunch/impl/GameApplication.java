@@ -57,11 +57,4 @@ public class GameApplication implements ServerApplication {
 
     }
 
-
-    public static void main(String[] args) {
-        WalletService walletservice = RemoteServicesFactory.getFactory().getRemoteService(WalletService.class);
-        IncrementBalanceResponse balanceResponse = walletservice.incrementBalance("andrus", BigDecimal.valueOf(10));
-        System.out.println(balanceResponse.getBalance());
-    }
-
 }
